@@ -213,6 +213,123 @@
     ],
     "orders": [
         {
+            "id": 4940,
+            "vendor_id": 8,
+            "vendor_name": "GreenMart Grocery",
+            "customer_name": "Arjun M",
+            "customer_code": "AA",
+            "amount": 360,
+            "items_count": 2,
+            "type": "Pickup",
+            "status": "Pending",
+            "time": "Just now",
+            "day": "Sun"
+        },
+        {
+            "id": 4939,
+            "vendor_id": 8,
+            "vendor_name": "GreenMart Grocery",
+            "customer_name": "Sonia P",
+            "customer_code": "SP",
+            "amount": 360,
+            "items_count": 1,
+            "type": "Delivery",
+            "status": "Completed",
+            "time": "Just now",
+            "day": "Sun"
+        },
+        {
+            "id": 4938,
+            "vendor_id": 1,
+            "vendor_name": "Amrit Dairy",
+            "customer_name": "Sonia P",
+            "customer_code": "SP",
+            "amount": 500,
+            "items_count": 3,
+            "type": "Pickup",
+            "status": "Pending",
+            "time": "Just now",
+            "day": "Sun"
+        },
+        {
+            "id": 4937,
+            "vendor_id": 3,
+            "vendor_name": "Daily Needs Store",
+            "customer_name": "Rahul S",
+            "customer_code": "RS",
+            "amount": 860,
+            "items_count": 4,
+            "type": "Delivery",
+            "status": "Completed",
+            "time": "Just now",
+            "day": "Sun"
+        },
+        {
+            "id": 4936,
+            "vendor_id": 7,
+            "vendor_name": "Patharghata Grocers",
+            "customer_name": "Deepak T",
+            "customer_code": "DT",
+            "amount": 360,
+            "items_count": 3,
+            "type": "Delivery",
+            "status": "Pending",
+            "time": "Just now",
+            "day": "Sun"
+        },
+        {
+            "id": 4935,
+            "vendor_id": 4,
+            "vendor_name": "FreshFruit Hub",
+            "customer_name": "Vijay R",
+            "customer_code": "VR",
+            "amount": 90,
+            "items_count": 2,
+            "type": "Delivery",
+            "status": "Completed",
+            "time": "Just now",
+            "day": "Sun"
+        },
+        {
+            "id": 4934,
+            "vendor_id": 7,
+            "vendor_name": "Patharghata Grocers",
+            "customer_name": "Vijay R",
+            "customer_code": "VR",
+            "amount": 180,
+            "items_count": 3,
+            "type": "Pickup",
+            "status": "Accepted",
+            "time": "Just now",
+            "day": "Sun"
+        },
+        {
+            "id": 4933,
+            "vendor_id": 6,
+            "vendor_name": "Scoops & Co",
+            "customer_name": "Vijay R",
+            "customer_code": "VR",
+            "amount": 440,
+            "items_count": 3,
+            "type": "Pickup",
+            "status": "Pending",
+            "time": "Just now",
+            "day": "Sun"
+        },
+        {
+            "id": 4932,
+            "vendor_id": 3,
+            "vendor_name": "Daily Needs Store",
+            "customer_name": "Deepak T",
+            "customer_code": "DT",
+            "amount": 360,
+            "items_count": 1,
+            "type": "Delivery",
+            "status": "Completed",
+            "time": "Just now",
+            "day": "Sun"
+        },
+        {
             "id": 4931,
             "vendor_id": 2,
             "vendor_name": "GreenLeaf Veggies",
@@ -1707,6 +1824,6 @@
         "Thu": 124,
         "Fri": 119,
         "Sat": 150,
-        "Sun": 250
+        "Sun": 259
     }
 }
