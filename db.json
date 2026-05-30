@@ -213,6 +213,45 @@
     ],
     "orders": [
         {
+            "id": 4943,
+            "vendor_id": 1,
+            "vendor_name": "Amrit Dairy",
+            "customer_name": "Vijay R",
+            "customer_code": "VR",
+            "amount": 500,
+            "items_count": 3,
+            "type": "Delivery",
+            "status": "Accepted",
+            "time": "Just now",
+            "day": "Sun"
+        },
+        {
+            "id": 4942,
+            "vendor_id": 1,
+            "vendor_name": "Amrit Dairy",
+            "customer_name": "Rahul S",
+            "customer_code": "RS",
+            "amount": 500,
+            "items_count": 4,
+            "type": "Delivery",
+            "status": "Completed",
+            "time": "Just now",
+            "day": "Sun"
+        },
+        {
+            "id": 4941,
+            "vendor_id": 3,
+            "vendor_name": "Daily Needs Store",
+            "customer_name": "Rahul S",
+            "customer_code": "RS",
+            "amount": 360,
+            "items_count": 2,
+            "type": "Pickup",
+            "status": "Completed",
+            "time": "Just now",
+            "day": "Sun"
+        },
+        {
             "id": 4940,
             "vendor_id": 8,
             "vendor_name": "GreenMart Grocery",
@@ -1824,6 +1863,6 @@
         "Thu": 124,
         "Fri": 119,
         "Sat": 150,
-        "Sun": 259
+        "Sun": 262
     }
 }
