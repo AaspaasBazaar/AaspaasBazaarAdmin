@@ -153,6 +153,11 @@ export const OrderSchema = z.object({
   status: OrderStatus,
   time: z.string(),
   day: Day,
+  // Firebase uid of the customer who placed it via the app. Optional because
+  // admin-created / simulated orders use the anonymous code-based model and
+  // carry no user account. Required for per-user scoping + the /orders realtime
+  // read rule in firestore.rules.
+  user_id: z.string().min(1).optional(),
 });
 export type Order = z.infer<typeof OrderSchema>;
 
@@ -210,3 +215,22 @@ export const AdminPatch = AdminSchema
   .omit({ email: true, created_at: true, password_hash: true, password_salt: true })
   .partial()
   .extend({ password: z.string().min(8).max(128).optional() });
+
+// ----- app users (customers of the user app) -----
+// Keyed by Firebase uid. Identity is owned by Firebase Auth; this record holds
+// the marketplace profile. No password fields — auth is delegated to Firebase.
+export const UserSchema = z.object({
+  uid: z.string().min(1),
+  name: z.string().min(1).max(120),
+  email: z.string().email().max(254).optional(),
+  phone: z.string().max(20).optional(),
+  default_address: z.string().max(500).optional(),
+  default_pincode: z.string().max(10).optional(),
+  active: z.boolean().default(true),
+  created_at: z.number().int().nonnegative(),
+});
+export type User = z.infer<typeof UserSchema>;
+// Fields a client may set when creating/patching its own profile. uid, active,
+// and created_at are server-controlled (uid from the verified token).
+export const UserCreate = UserSchema.omit({ uid: true, active: true, created_at: true });
+export const UserPatch = UserCreate.partial();

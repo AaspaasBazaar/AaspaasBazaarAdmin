@@ -5,7 +5,10 @@ import { NextResponse, type NextRequest } from "next/server";
 const SESSION_COOKIE = "ab_session";
 
 const PUBLIC_PATHS = new Set<string>(["/login"]);
-const PUBLIC_PREFIXES = ["/api/auth/", "/api/health", "/_next/", "/favicon"];
+// /api/app/* = public app surface (user + vendor apps). These authenticate with
+// a Firebase ID token Bearer header, verified per-route in lib/auth-token.ts —
+// not the admin cookie. So they skip this cookie gate, NOT auth itself.
+const PUBLIC_PREFIXES = ["/api/auth/", "/api/health", "/api/app/", "/_next/", "/favicon"];
 
 function isPublic(pathname: string): boolean {
   if (PUBLIC_PATHS.has(pathname)) return true;

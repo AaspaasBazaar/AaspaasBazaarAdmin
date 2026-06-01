@@ -17,6 +17,7 @@ type DbShape = {
   items: Array<Record<string, unknown> & { id: number }>;
   orders: Array<Record<string, unknown> & { id: number }>;
   admins: Array<Record<string, unknown> & { email: string }>;
+  users: Array<Record<string, unknown> & { uid: string }>;
   categories: Array<Record<string, unknown> & { slug: string }>;
   zones: Array<Record<string, unknown> & { id: string }>;
   settings: Record<string, unknown>;
@@ -40,6 +41,7 @@ async function readJson(): Promise<DbShape> {
       items: parsed.items ?? [],
       orders: parsed.orders ?? [],
       admins: parsed.admins ?? [],
+      users: parsed.users ?? [],
       categories: parsed.categories ?? [],
       zones: parsed.zones ?? [],
       settings: parsed.settings ?? {},
@@ -49,7 +51,7 @@ async function readJson(): Promise<DbShape> {
     };
   } catch {
     return {
-      vendors: [], items: [], orders: [], admins: [], categories: [], zones: [],
+      vendors: [], items: [], orders: [], admins: [], users: [], categories: [], zones: [],
       settings: {},
       weekly_totals: { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 },
     };
