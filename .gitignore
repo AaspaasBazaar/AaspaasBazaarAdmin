@@ -36,3 +36,7 @@ Thumbs.db
 
 # Vercel
 .vercel
+
+# Playwright artifacts (debug screenshots from local testing)
+.playwright-mcp/
+/*.png

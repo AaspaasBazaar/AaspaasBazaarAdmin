@@ -1,8 +1,10 @@
-import { OrderSchema, type Order, type Day } from "@/lib/schemas";
+import { OrderSchema, OrderStatus, type Order, type Day } from "@/lib/schemas";
 import {
   storageMode,
   listFirestore,
+  getFirestoreDoc,
   setFirestoreDoc,
+  updateFirestoreDoc,
   firestoreDb,
   mutateJson,
   readJsonOnce,
@@ -45,4 +47,28 @@ export async function addOrder(payload: Omit<Order, "id"> & { id?: number }): Pr
     });
   }
   return order;
+}
+
+export async function getOrder(id: number): Promise<Order | null> {
+  if (storageMode() === "firestore") return getFirestoreDoc<Order>(COL, String(id));
+  const db = await readJsonOnce();
+  return (db.orders.find((o) => o.id === id) as Order) ?? null;
+}
+
+export async function updateOrderStatus(id: number, status: string): Promise<Order | null> {
+  const parsed = OrderStatus.safeParse(status);
+  if (!parsed.success) throw new Error(`Invalid status: ${status}`);
+  const cur = await getOrder(id);
+  if (!cur) return null;
+  const next = { ...cur, status: parsed.data };
+
+  if (storageMode() === "firestore") {
+    await updateFirestoreDoc(COL, String(id), { status: parsed.data });
+  } else {
+    await mutateJson(async (db) => {
+      const o = db.orders.find((x) => x.id === id);
+      if (o) (o as Record<string, unknown>).status = parsed.data;
+    });
+  }
+  return next;
 }

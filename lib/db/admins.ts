@@ -9,6 +9,7 @@ import {
   mutateJson,
   readJsonOnce,
 } from "@/lib/storage";
+import { hashPassword } from "@/lib/password";
 
 const COL = "admins";
 
@@ -30,10 +31,13 @@ export async function getAdmin(email: string): Promise<Admin | null> {
   return (db.admins.find((a) => (a.email as string).toLowerCase() === id) as Admin) ?? null;
 }
 
-export async function addAdmin(input: Omit<Admin, "created_at">): Promise<
-  { ok: true; admin: Admin } | { ok: false; code: "DUPLICATE" }
-> {
-  const candidate = AdminSchema.parse({ ...input, created_at: Date.now() });
+export async function addAdmin(
+  input: Omit<Admin, "created_at" | "password_hash" | "password_salt"> & { password?: string },
+): Promise<{ ok: true; admin: Admin } | { ok: false; code: "DUPLICATE" }> {
+  const { password, ...rest } = input;
+  const base = { ...rest, created_at: Date.now() };
+  const withHash = password ? { ...base, ...hashPassword(password) } : base;
+  const candidate = AdminSchema.parse(withHash);
   const existing = await getAdmin(candidate.email);
   if (existing) return { ok: false, code: "DUPLICATE" };
 
@@ -49,22 +53,37 @@ export async function addAdmin(input: Omit<Admin, "created_at">): Promise<
 
 export async function updateAdmin(
   email: string,
-  patch: Partial<Omit<Admin, "email" | "created_at">>,
+  patch: Partial<Omit<Admin, "email" | "created_at">> & { password?: string },
 ): Promise<Admin | null> {
   const id = email.trim().toLowerCase();
   const cur = await getAdmin(id);
   if (!cur) return null;
-  const merged = AdminSchema.parse({ ...cur, ...patch });
+  const { password, ...rest } = patch;
+  const merged: Partial<Admin> = { ...rest };
+  if (password) Object.assign(merged, hashPassword(password));
+
+  const next = AdminSchema.parse({ ...cur, ...merged });
 
   if (storageMode() === "firestore") {
-    await updateFirestoreDoc(COL, id, patch as Record<string, unknown>);
+    await updateFirestoreDoc(COL, id, merged as Record<string, unknown>);
   } else {
     await mutateJson(async (db) => {
       const a = db.admins.find((x) => (x.email as string).toLowerCase() === id);
-      if (a) Object.assign(a, patch);
+      if (a) Object.assign(a, merged);
     });
   }
-  return merged;
+  return next;
+}
+
+/**
+ * Set the initial password for an admin that does not yet have one.
+ * Returns false if a password is already set (refuses to overwrite without auth).
+ */
+export async function setInitialPassword(email: string, password: string): Promise<Admin | null> {
+  const cur = await getAdmin(email);
+  if (!cur) return null;
+  if (cur.password_hash) return null;
+  return updateAdmin(email, { password });
 }
 
 export async function toggleAdmin(email: string): Promise<{ email: string; active: boolean } | null> {

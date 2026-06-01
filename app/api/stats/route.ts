@@ -3,10 +3,11 @@ import { listOrders } from "@/lib/db/orders";
 import { getWeeklyTotals } from "@/lib/db/weekly-totals";
 import { storageMode } from "@/lib/storage";
 import { ok } from "@/lib/api";
+import { withAuth } from "@/lib/auth-server";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export const GET = withAuth(undefined, async () => {
   const [vendors, orders, weekly] = await Promise.all([
     listVendors(),
     listOrders(),
@@ -40,4 +41,4 @@ export async function GET() {
     weekly_totals: weekly,
     storage_mode: storageMode() === "firestore" ? "Firestore (Online)" : "Local Database (JSON)",
   });
-}
+});

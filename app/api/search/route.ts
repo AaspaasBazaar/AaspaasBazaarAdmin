@@ -2,10 +2,11 @@ import { listVendors } from "@/lib/db/vendors";
 import { listItems } from "@/lib/db/items";
 import { listOrders } from "@/lib/db/orders";
 import { ok } from "@/lib/api";
+import { withAuth } from "@/lib/auth-server";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(req: Request) {
+export const GET = withAuth(undefined, async (_session, req: Request) => {
   const url = new URL(req.url);
   const q = (url.searchParams.get("q") ?? "").toLowerCase();
 
@@ -38,6 +39,10 @@ export async function GET(req: Request) {
   return ok({
     query: q,
     total_results: matchedVendors.length + matchedItems.length + matchedOrders.length,
-    results: { vendors: matchedVendors, items: matchedItems, orders: matchedOrders },
+    results: {
+      vendors: matchedVendors.slice(0, 10),
+      items: matchedItems.slice(0, 10),
+      orders: matchedOrders.slice(0, 10),
+    },
   });
-}
+});

@@ -1,14 +1,13 @@
 import { listAdmins, addAdmin } from "@/lib/db/admins";
 import { AdminCreate } from "@/lib/schemas";
 import { ok, err, badRequest, parseJson } from "@/lib/api";
+import { withAuth } from "@/lib/auth-server";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
-  return ok(await listAdmins());
-}
+export const GET = withAuth(undefined, async () => ok(await listAdmins()));
 
-export async function POST(req: Request) {
+export const POST = withAuth(["owner"], async (_session, req: Request) => {
   try {
     const body = await parseJson(req);
     const payload = AdminCreate.parse(body);
@@ -18,4 +17,4 @@ export async function POST(req: Request) {
   } catch (e) {
     return badRequest(e);
   }
-}
+});

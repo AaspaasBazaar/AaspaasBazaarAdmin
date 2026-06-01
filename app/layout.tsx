@@ -1,43 +1,54 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import Link from "next/link";
+import { headers } from "next/headers";
+import { Bricolage_Grotesque, Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Sidebar } from "@/components/Sidebar";
+
+const bricolage = Bricolage_Grotesque({
+  subsets: ["latin"],
+  variable: "--font-bricolage",
+  weight: ["400", "700", "800"],
+  display: "swap",
+});
+const hanken = Hanken_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-hanken",
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+const jetbrains = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains",
+  weight: ["500", "700"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "AaspaasBazaar Admin",
   description: "Admin panel for the AaspaasBazaar hyperlocal marketplace",
 };
 
-const NAV = [
-  { href: "/", label: "Dashboard" },
-  { href: "/vendors", label: "Vendors" },
-  { href: "/items", label: "Items" },
-  { href: "/orders", label: "Orders" },
-  { href: "/settings", label: "Settings" },
-  { href: "/admins", label: "Admins" },
-];
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const h = await headers();
+  const pathname = h.get("x-pathname") ?? "/";
+  const isAuthShell = pathname !== "/login";
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen flex">
-        <aside className="w-60 shrink-0 border-r border-slate-200 bg-white">
-          <div className="px-5 py-4 border-b border-slate-200">
-            <div className="text-bazaar-green font-semibold">AaspaasBazaar</div>
-            <div className="text-xs text-slate-500">Admin Panel</div>
-          </div>
-          <nav className="p-3 space-y-1">
-            {NAV.map((n) => (
-              <Link
-                key={n.href}
-                href={n.href}
-                className="block px-3 py-2 rounded hover:bg-slate-100 text-sm text-slate-700"
-              >
-                {n.label}
-              </Link>
-            ))}
-          </nav>
-        </aside>
-        <main className="flex-1 p-6">{children}</main>
+    <html
+      lang="en"
+      className={`${bricolage.variable} ${hanken.variable} ${jetbrains.variable}`}
+    >
+      <body className="min-h-screen flex bg-canvas">
+        {isAuthShell ? (
+          <>
+            <Sidebar />
+            <div className="flex-1 m-4 ml-0 panel overflow-hidden flex flex-col">
+              {children}
+            </div>
+          </>
+        ) : (
+          <div className="flex-1">{children}</div>
+        )}
       </body>
     </html>
   );

@@ -1,14 +1,13 @@
 import { getSettings, saveSettings } from "@/lib/db/settings";
 import { SettingsPatch } from "@/lib/schemas";
 import { ok, badRequest, parseJson } from "@/lib/api";
+import { withAuth } from "@/lib/auth-server";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
-  return ok(await getSettings());
-}
+export const GET = withAuth(undefined, async () => ok(await getSettings()));
 
-export async function POST(req: Request) {
+export const POST = withAuth(["owner", "admin"], async (_session, req: Request) => {
   try {
     const body = await parseJson(req);
     const patch = SettingsPatch.parse(body);
@@ -17,4 +16,4 @@ export async function POST(req: Request) {
   } catch (e) {
     return badRequest(e);
   }
-}
+});
