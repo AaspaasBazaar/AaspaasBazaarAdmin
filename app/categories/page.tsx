@@ -1,11 +1,12 @@
-import { listCategories } from "@/lib/db/categories";
+import { backendFetch } from "@/lib/backend";
+import type { Category } from "@/lib/schemas";
 import { Topbar } from "@/components/Topbar";
 import { CategoriesPanel } from "@/components/CategoriesPanel";
 
 export const dynamic = "force-dynamic";
 
 export default async function CategoriesPage() {
-  const categories = await listCategories();
+  const categories = await backendFetch<Category[]>("/api/admin/categories");
   return (
     <>
       <Topbar title="Categories" subtitle="Tags that group vendors and items" />

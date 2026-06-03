@@ -1,6 +1,16 @@
 # AaspaasBazaar Admin Panel
 
-Admin panel for the AaspaasBazaar hyperlocal marketplace — manage vendors, items, orders, and platform settings.
+Admin panel for the AaspaasBazaar hyperlocal marketplace — manage vendors, items, orders, zones, categories, and platform settings.
+
+This app is a **pure frontend**. All data lives behind the standalone
+[AaspaasBazaarBackend](https://github.com/AaspaasBazaar/AaspaasBazaarBackend)
+service, which is the **only writer to Firestore**. Every CRUD operation here
+goes over HTTP to that service — no Firebase credentials or database access
+exist in this repo.
+
+```
+[Admin panel (this repo)] ──/api/* proxy──> [AaspaasBazaarBackend] ──Admin SDK──> [Firestore]
+```
 
 ## Stack
 
@@ -8,30 +18,35 @@ Admin panel for the AaspaasBazaar hyperlocal marketplace — manage vendors, ite
 |-------|--------|
 | Language | TypeScript |
 | Framework | Next.js 15 (App Router) |
-| Persistence | Firestore (primary) — falls back to local `db.json` when Admin creds absent |
+| Data | AaspaasBazaarBackend REST API (`API_BASE_URL`) |
 | Frontend | React 19 + Tailwind CSS |
-| Validation | Zod |
-| Deploy target | Vercel + Firebase |
+| Deploy target | Vercel |
 
-Storage auto-detects: with `FIREBASE_PROJECT_ID` + `FIREBASE_CLIENT_EMAIL` + `FIREBASE_PRIVATE_KEY` set, the app uses Firestore. Without them, it reads / writes the bundled `db.json` so a fresh clone runs immediately.
+## How requests flow
 
-Override with `STORAGE_MODE=firestore` (require Firestore — error if creds missing) or `STORAGE_MODE=json` (force local mode).
+- **Server components** (`app/*/page.tsx`) fetch data with `lib/backend.ts` →
+  `backendFetch("/api/admin/...")`, forwarding the admin session cookie.
+- **Client components** call same-origin `/api/...`; the catch-all proxy at
+  `app/api/[...path]/route.ts` forwards each request to the backend
+  (`/api/vendors` → `{API_BASE_URL}/api/admin/vendors`, `/api/auth/*` and
+  `/api/health` pass through verbatim) and relays `Set-Cookie` on login/logout.
+- **Auth, validation, role + zone scoping** are all enforced by the backend.
+  `middleware.ts` only checks cookie *presence* for fast login redirects.
 
 ## Quickstart
 
 ```bash
+# 1. run the backend (separate repo)
+cd ../AaspaasBazaarBackend && STORAGE_MODE=json PORT=8080 npm run dev
+
+# 2. run this admin panel
+cp .env.example .env.local        # API_BASE_URL=http://localhost:8080
 npm install
-npm run dev                  # http://localhost:3000
+npm run dev                       # http://localhost:3000
 ```
 
-Optional — wire Firestore:
-
-```bash
-cp .env.example .env.local
-# fill FIREBASE_PROJECT_ID / FIREBASE_CLIENT_EMAIL / FIREBASE_PRIVATE_KEY
-npm run seed                 # one-shot migration from db.json
-npm run dev
-```
+Sign in with an admin seeded in the backend's datastore (first login sets the
+password for a seeded admin without one).
 
 ## Scripts
 
@@ -42,7 +57,6 @@ npm run dev
 | `npm run start` | Serve production build |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm run seed` | Seed Firestore from `db.json` (Admin creds required) |
 
 ## Routes
 
@@ -51,45 +65,37 @@ UI:
 | Path | Page |
 |------|------|
 | `/` | Dashboard |
-| `/vendors` | Vendor list |
+| `/vendors` | Vendor list + approval workflow |
 | `/items` | Item list |
 | `/orders` | Recent orders |
-| `/settings` | Platform settings (read-only stub) |
+| `/zones` | Zones + zonal admins |
+| `/categories` | Category management |
 | `/admins` | Admin user list |
+| `/settings` | Platform settings |
 
-API: see [`docs/api-reference.md`](./docs/api-reference.md).
+API: every `/api/*` path is proxied to the backend — the endpoint contract is
+documented in the backend repo (see `docs/BACKEND_REPO_SPEC.md` §7).
 
 ## Project layout
 
 ```
-app/                 # Next.js App Router (pages + API routes)
-  api/               # 11 REST endpoints
+app/                     # Next.js App Router pages
+  api/[...path]/route.ts # Catch-all proxy → AaspaasBazaarBackend
+components/              # Client components (tables, forms, charts)
 lib/
-  schemas.ts         # Zod schemas (single source of truth for shapes)
-  firebase-admin.ts  # Admin SDK init (lazy, cached)
-  storage.ts         # Firestore | JSON storage abstraction
-  db/                # One module per collection
-  sim/               # Order simulator
-scripts/
-  seed-from-dbjson.ts
-docs/                # Full docs (architecture, data model, security, deployment, ...)
-db.json              # Dev seed data — used directly in JSON mode
+  backend.ts             # Server-side HTTP client for the backend service
+  schemas.ts             # Zod schemas/types shared with UI components
+middleware.ts            # Cookie-presence gate (redirects to /login)
+docs/                    # Specs + API test report
 ```
 
 ## Documentation
 
 | Doc | Purpose |
 |-----|---------|
-| [architecture.md](./docs/architecture.md) | System diagram, layers, folder layout |
-| [data-model.md](./docs/data-model.md) | Firestore collections, Zod schemas |
-| [api-reference.md](./docs/api-reference.md) | REST endpoint contracts |
-| [setup.md](./docs/setup.md) | Local dev setup |
-| [deployment.md](./docs/deployment.md) | Vercel + Firebase production deploy |
-| [frontend.md](./docs/frontend.md) | Page list, components, state, design system |
-| [security.md](./docs/security.md) | Auth, Firestore rules, middleware, rate limits |
-| [migration.md](./docs/migration.md) | Flask → Next.js migration plan + data seed (historical) |
-| [roadmap.md](./docs/roadmap.md) | Phased delivery plan |
-| [contributing.md](./docs/contributing.md) | Branching, commits, code style, tests |
+| [BACKEND_REPO_SPEC.md](./docs/BACKEND_REPO_SPEC.md) | Backend service spec (source of truth for API contract) |
+| [API_TEST_REPORT.md](./docs/API_TEST_REPORT.md) | End-to-end API verification report |
+| [WEBSITE_DESIGN_PROMPT.md](./docs/WEBSITE_DESIGN_PROMPT.md) | Customer/vendor webapp design brief |
 
 ## License
 

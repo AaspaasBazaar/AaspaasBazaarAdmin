@@ -1,6 +1,5 @@
-import { listVendors } from "@/lib/db/vendors";
-import { listCategories } from "@/lib/db/categories";
-import { listZones } from "@/lib/db/zones";
+import { backendFetch } from "@/lib/backend";
+import type { Vendor, Category, Zone } from "@/lib/schemas";
 import { Topbar } from "@/components/Topbar";
 import { VendorsTable } from "@/components/VendorsTable";
 
@@ -8,9 +7,9 @@ export const dynamic = "force-dynamic";
 
 export default async function VendorsPage() {
   const [vendors, categories, zones] = await Promise.all([
-    listVendors(),
-    listCategories(),
-    listZones(),
+    backendFetch<Vendor[]>("/api/admin/vendors"),
+    backendFetch<Category[]>("/api/admin/categories"),
+    backendFetch<Zone[]>("/api/admin/zones"),
   ]);
   return (
     <>

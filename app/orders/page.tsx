@@ -1,5 +1,5 @@
-import { listOrders } from "@/lib/db/orders";
-import { listVendors } from "@/lib/db/vendors";
+import { backendFetch } from "@/lib/backend";
+import type { Order, Vendor } from "@/lib/schemas";
 import { Topbar } from "@/components/Topbar";
 import { OrdersTable } from "@/components/OrdersTable";
 
@@ -7,8 +7,8 @@ export const dynamic = "force-dynamic";
 
 export default async function OrdersPage() {
   const [orders, vendors] = await Promise.all([
-    listOrders({ limit: 200 }),
-    listVendors(),
+    backendFetch<Order[]>("/api/admin/orders?limit=200"),
+    backendFetch<Vendor[]>("/api/admin/vendors"),
   ]);
   return (
     <>

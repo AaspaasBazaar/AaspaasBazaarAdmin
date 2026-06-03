@@ -1,6 +1,5 @@
-import { listVendors } from "@/lib/db/vendors";
-import { listOrders } from "@/lib/db/orders";
-import { getWeeklyTotals } from "@/lib/db/weekly-totals";
+import { backendFetch } from "@/lib/backend";
+import type { Order, Vendor, WeeklyTotals } from "@/lib/schemas";
 import { Topbar } from "@/components/Topbar";
 import { StatCard } from "@/components/StatCard";
 import { WeeklyChart } from "@/components/WeeklyChart";
@@ -9,20 +8,22 @@ import { SimulateButton } from "@/components/SimulateButton";
 
 export const dynamic = "force-dynamic";
 
+type Stats = { weekly_totals: WeeklyTotals };
+
 export default async function Dashboard() {
-  const [vendors, orders, weekly] = await Promise.all([
-    listVendors(),
-    listOrders({ limit: 4 }),
-    getWeeklyTotals(),
+  const [vendors, orders, stats] = await Promise.all([
+    backendFetch<Vendor[]>("/api/admin/vendors"),
+    backendFetch<Order[]>("/api/admin/orders"),
+    backendFetch<Stats>("/api/admin/stats"),
   ]);
+  const weekly = stats.weekly_totals;
 
   const openVendors = vendors.filter((v) => v.open).length;
   const ordersThisWeek = Object.values(weekly).reduce((s, n) => s + n, 0);
-  const revenueAll = (await listOrders()).reduce((s, o) => s + o.amount, 0);
+  const revenueAll = orders.reduce((s, o) => s + o.amount, 0);
   const revenueLakh = (revenueAll / 100000).toFixed(2);
-  const pending = (await listOrders()).filter((o) =>
-    ["Pending", "Accepted"].includes(o.status),
-  ).length;
+  const pending = orders.filter((o) => ["Pending", "Accepted"].includes(o.status)).length;
+  const feed = orders.slice(0, 4);
 
   return (
     <>
@@ -53,7 +54,7 @@ export default async function Dashboard() {
           <div className="lg:col-span-2">
             <WeeklyChart totals={weekly} />
           </div>
-          <LiveFeed orders={orders} />
+          <LiveFeed orders={feed} />
         </section>
       </div>
     </>

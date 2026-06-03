@@ -1,14 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-// Inlined (not imported) because middleware runs on the Edge runtime and
-// importing lib/session.ts would pull in node:crypto which is not supported.
+// Cookie name matches what the backend service issues on /api/auth/login.
+// This gate only checks PRESENCE for fast redirects — HMAC verification and
+// role enforcement happen in the AaspaasBazaarBackend service on every call.
 const SESSION_COOKIE = "ab_session";
 
 const PUBLIC_PATHS = new Set<string>(["/login"]);
-// /api/app/* = public app surface (user + vendor apps). These authenticate with
-// a Firebase ID token Bearer header, verified per-route in lib/auth-token.ts —
-// not the admin cookie. So they skip this cookie gate, NOT auth itself.
-const PUBLIC_PREFIXES = ["/api/auth/", "/api/health", "/api/app/", "/_next/", "/favicon"];
+const PUBLIC_PREFIXES = ["/api/auth/", "/api/health", "/_next/", "/favicon"];
 
 function isPublic(pathname: string): boolean {
   if (PUBLIC_PATHS.has(pathname)) return true;

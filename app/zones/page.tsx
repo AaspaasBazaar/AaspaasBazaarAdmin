@@ -1,12 +1,15 @@
-import { listZones } from "@/lib/db/zones";
-import { listAdmins } from "@/lib/db/admins";
+import { backendFetch } from "@/lib/backend";
+import type { Zone, Admin } from "@/lib/schemas";
 import { Topbar } from "@/components/Topbar";
 import { ZonesPanel } from "@/components/ZonesPanel";
 
 export const dynamic = "force-dynamic";
 
 export default async function ZonesPage() {
-  const [zones, admins] = await Promise.all([listZones(), listAdmins()]);
+  const [zones, admins] = await Promise.all([
+    backendFetch<Zone[]>("/api/admin/zones"),
+    backendFetch<Admin[]>("/api/admin/admins"),
+  ]);
   return (
     <>
       <Topbar title="Zones" subtitle="Geographic groups of pincodes; each zone has its zonal admin" />
